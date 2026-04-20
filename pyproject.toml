@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "femlab"
+version = "0.1.0"
+description = "Educational FEM codebase built on NVIDIA Warp"
+requires-python = ">=3.10"
+dependencies = [
+    "warp-lang>=1.11",
+    "numpy>=1.24",
+    "pyvista>=0.43",
+    "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/femlab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
