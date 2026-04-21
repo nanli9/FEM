@@ -16,6 +16,7 @@ SCRIPTS_DIR = PROJECT_ROOT / "scripts"
 
 CASES = {
     "sanity": "sanity.py",
+    "cantilever": "cantilever.py",
 }
 
 
