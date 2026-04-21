@@ -114,9 +114,17 @@ python scripts/run_case.py vibration    # 2D dynamic free vibration
 - Only structured meshes (rectangle, box) supported
 - No damping in time integrators
 
-## Milestone 3 (Next): Corotational FEM
+## Milestone 3 (Next): Deformation Gradient, Hyperelastic Materials & Newton Solver
 
-- [ ] Rotation extraction per element
-- [ ] Corotational element stiffness and residual
-- [ ] Newton iteration for geometric nonlinearity
+- [ ] Deformation gradient F from nodal positions
+- [ ] Hyperelastic material models (Neo-Hookean)
+- [ ] First Piola-Kirchhoff stress and tangent from F
+- [ ] Newton-Raphson iteration for nonlinear static solve
 - [ ] Large-deformation cantilever benchmark
+
+## Milestone 4: Corotational FEM
+
+- [ ] Polar decomposition of F → rotation R per element
+- [ ] Corotational element stiffness and residual wrapper
+- [ ] Geometric stiffness correction term
+- [ ] Comparison against full nonlinear solve

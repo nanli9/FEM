@@ -31,8 +31,8 @@ Implement features in this order unless the user explicitly overrides:
 1. Environment setup and visualization
 2. 2D/3D linear static FEM
 3. Mass matrix and time stepping
-4. Corotational FEM
-5. Nonlinear hyperelastic FEM with Newton solve
+4. Nonlinear hyperelastic FEM with Newton solve (deformation gradient, Neo-Hookean, Newton-Raphson)
+5. Corotational FEM (polar decomposition of F, corotational wrapper around linear elements)
 6. Research branch for XFEM / cutting
 
 ## Required engineering standards
