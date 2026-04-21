@@ -19,6 +19,7 @@ CASES = {
     "cantilever": "cantilever.py",
     "beam3d": "beam3d.py",
     "vibration": "vibration.py",
+    "cantilever_nl": "cantilever_nl.py",
 }
 
 

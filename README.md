@@ -114,15 +114,36 @@ python scripts/run_case.py vibration    # 2D dynamic free vibration
 - Only structured meshes (rectangle, box) supported
 - No damping in time integrators
 
-## Milestone 3 (Next): Deformation Gradient, Hyperelastic Materials & Newton Solver
+## Milestone 3: Deformation Gradient, Hyperelastic Materials & Newton Solver
 
-- [ ] Deformation gradient F from nodal positions
-- [ ] Hyperelastic material models (Neo-Hookean)
-- [ ] First Piola-Kirchhoff stress and tangent from F
-- [ ] Newton-Raphson iteration for nonlinear static solve
-- [ ] Large-deformation cantilever benchmark
+**Status**: Complete
 
-## Milestone 4: Corotational FEM
+What is implemented:
+- Deformation gradient F from nodal positions (`femlab.core.kinematics`)
+- G matrix (9×12) mapping DOFs to vectorized F for compact force/stiffness expressions
+- Compressible Neo-Hookean hyperelastic material model (`femlab.core.hyperelastic`)
+- First Piola-Kirchhoff stress P = ∂W/∂F and material tangent A = ∂P/∂F (9×9)
+- Nonlinear Tet4 element internal force and tangent stiffness (`femlab.core.element_nl`)
+- Nonlinear global assembly with combined K_T + f_int pass (`femlab.core.assembly_nl`)
+- Newton-Raphson solver with convergence diagnostics (`femlab.core.newton`)
+- K_T at u=0 verified to equal linear stiffness (nonlinear ↔ linear bridge test)
+- Numerical verification of P = ∂W/∂F and A = ∂P/∂F via finite differences
+- Large-deformation cantilever demo with load stepping and load-displacement curve
+
+### Run the demo
+
+```bash
+python scripts/run_case.py cantilever_nl
+```
+
+### Known limitations
+
+- Assembly loops are in Python (no Warp kernel acceleration yet)
+- No line search or arc-length control — relies on load stepping for convergence
+- Only Neo-Hookean material; no Mooney-Rivlin or Ogden yet
+- Displacement-based formulation may lock for nearly incompressible materials (ν → 0.5)
+
+## Milestone 4 (Next): Corotational FEM
 
 - [ ] Polar decomposition of F → rotation R per element
 - [ ] Corotational element stiffness and residual wrapper
