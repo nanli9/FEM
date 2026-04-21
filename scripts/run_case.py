@@ -17,6 +17,8 @@ SCRIPTS_DIR = PROJECT_ROOT / "scripts"
 CASES = {
     "sanity": "sanity.py",
     "cantilever": "cantilever.py",
+    "beam3d": "beam3d.py",
+    "vibration": "vibration.py",
 }
 
 

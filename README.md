@@ -81,10 +81,42 @@ pytest
 - Assembly loop is in Python (no Warp kernel acceleration yet)
 - Only structured rectangular meshes supported
 
-## Milestone 2 (Next): 3D Linear Static / Mass Matrix & Time Stepping
+## Milestone 2: 3D Linear Static / Mass Matrix & Time Stepping
 
-- [ ] Tet4 shape functions and gradients
-- [ ] 3D constitutive matrix
-- [ ] 3D element stiffness and assembly
-- [ ] Consistent/lumped mass matrix
-- [ ] Time integration (Newmark or central difference)
+**Status**: Complete
+
+What is implemented:
+- Tet4 (4-node tetrahedron) shape functions and gradients (`femlab.core.basis`)
+- Gauss quadrature on reference tetrahedron, orders 1 and 2 (`femlab.core.quadrature`)
+- 3D isotropic constitutive matrix (`femlab.core.material`)
+- Tet4 B-matrix, element stiffness, residual, and stress recovery (`femlab.core.element`)
+- 3D global sparse assembly (`femlab.core.assembly`)
+- Structured box mesh generator with Freudenthal Tet4 triangulation (`femlab.mesh.box`)
+- Consistent and lumped mass matrices for T3 and Tet4 (`femlab.core.mass`)
+- Central difference (explicit) time integrator with lumped mass (`femlab.core.dynamics`)
+- Newmark-beta (implicit, β=1/4, γ=1/2) time integrator (`femlab.core.dynamics`)
+- 3D patch tests (uniaxial stretch + pure shear) — pass to 1e-9 tolerance
+- Mass conservation tests (lumped vs consistent row-sum equivalence)
+- Energy conservation tests for both integrators
+- Cantilever natural frequency benchmark against analytical beam theory
+
+### Run the demos
+
+```bash
+python scripts/run_case.py beam3d       # 3D static cantilever
+python scripts/run_case.py vibration    # 2D dynamic free vibration
+```
+
+### Known limitations
+
+- Tet4 (constant-strain) elements converge slowly in bending, like T3
+- Assembly loops are in Python (no Warp kernel acceleration yet)
+- Only structured meshes (rectangle, box) supported
+- No damping in time integrators
+
+## Milestone 3 (Next): Corotational FEM
+
+- [ ] Rotation extraction per element
+- [ ] Corotational element stiffness and residual
+- [ ] Newton iteration for geometric nonlinearity
+- [ ] Large-deformation cantilever benchmark

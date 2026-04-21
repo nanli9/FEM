@@ -12,6 +12,7 @@ dependencies = [
     "numpy>=1.24",
     "pyvista>=0.43",
     "scipy>=1.11",
+    "matplotlib>=3.7",
 ]
 
 [project.optional-dependencies]

@@ -1,14 +1,12 @@
-"""T3 (3-node triangle) shape functions and gradients.
+"""Shape functions and gradients for linear simplex elements.
 
-Reference triangle:
-    Node 0: (0, 0)
-    Node 1: (1, 0)
-    Node 2: (0, 1)
+T3 (3-node triangle, 2D):
+    Reference triangle: (0,0), (1,0), (0,1)
+    N0 = 1 - xi - eta,  N1 = xi,  N2 = eta
 
-Shape functions:
-    N0(xi, eta) = 1 - xi - eta
-    N1(xi, eta) = xi
-    N2(xi, eta) = eta
+Tet4 (4-node tetrahedron, 3D):
+    Reference tetrahedron: (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+    N0 = 1 - xi - eta - zeta,  N1 = xi,  N2 = eta,  N3 = zeta
 """
 
 import numpy as np
@@ -82,4 +80,73 @@ def t3_grad_phys(coords: np.ndarray) -> tuple[np.ndarray, float]:
     dN_ref = t3_grad_ref()    # (2, 3)
     # dN_ref = J @ dN_phys  (chain rule), so dN_phys = J^{-1} @ dN_ref
     grad_phys = J_inv @ dN_ref  # (2, 3)
+    return grad_phys, det_J
+
+
+# ---------------------------------------------------------------------------
+# Tet4 (4-node tetrahedron, 3D)
+# ---------------------------------------------------------------------------
+
+def tet4_shape(xi: float, eta: float, zeta: float) -> np.ndarray:
+    """Evaluate Tet4 shape functions at a reference point.
+
+    Args:
+        xi, eta, zeta: Barycentric coordinates in the reference tet.
+
+    Returns:
+        (4,) array of shape function values [N0, N1, N2, N3].
+    """
+    return np.array([1.0 - xi - eta - zeta, xi, eta, zeta])
+
+
+def tet4_grad_ref() -> np.ndarray:
+    """Gradients of Tet4 shape functions in reference coordinates.
+
+    Constant for the linear tetrahedron.
+
+    Returns:
+        (3, 4) array where row 0 = dN/dxi, row 1 = dN/deta, row 2 = dN/dzeta.
+    """
+    return np.array([
+        [-1.0, 1.0, 0.0, 0.0],
+        [-1.0, 0.0, 1.0, 0.0],
+        [-1.0, 0.0, 0.0, 1.0],
+    ])
+
+
+def tet4_jacobian(coords: np.ndarray) -> np.ndarray:
+    """Compute the 3x3 Jacobian mapping reference → physical coordinates.
+
+    J = dN_ref @ coords  (3,4) @ (4,3) = (3,3)
+
+    Args:
+        coords: (4, 3) array of element vertex coordinates.
+
+    Returns:
+        (3, 3) Jacobian matrix.
+    """
+    dN_ref = tet4_grad_ref()
+    return dN_ref @ coords
+
+
+def tet4_grad_phys(coords: np.ndarray) -> tuple[np.ndarray, float]:
+    """Gradients of Tet4 shape functions in physical coordinates.
+
+    Args:
+        coords: (4, 3) array of element vertex coordinates.
+
+    Returns:
+        grad_phys: (3, 4) array — rows are dN/dx, dN/dy, dN/dz.
+        det_J: Determinant of the Jacobian (6 * element volume).
+    """
+    J = tet4_jacobian(coords)
+    det_J = float(np.linalg.det(J))
+    if det_J <= 0.0:
+        raise ValueError(
+            f"Non-positive Jacobian determinant ({det_J:.6e}). "
+            "Check element orientation."
+        )
+    J_inv = np.linalg.inv(J)
+    dN_ref = tet4_grad_ref()
+    grad_phys = J_inv @ dN_ref  # (3, 4)
     return grad_phys, det_J

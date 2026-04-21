@@ -2,12 +2,14 @@
 
 Builds the global system K u = f from element contributions using
 COO (coordinate) format, then converts to CSR for efficient solving.
+
+Supports T3 (2D, 2 DOFs/node) and Tet4 (3D, 3 DOFs/node).
 """
 
 import numpy as np
 from scipy import sparse
 
-from femlab.core.element import t3_element_stiffness
+from femlab.core.element import t3_element_stiffness, tet4_element_stiffness
 
 
 def assemble_global_stiffness(
@@ -101,5 +103,98 @@ def assemble_global_force(
         for ni in [n0, n1, n2]:
             f[2 * ni] += bx * force_per_node
             f[2 * ni + 1] += by * force_per_node
+
+    return f
+
+
+# ---------------------------------------------------------------------------
+# Tet4 (3D, 3 DOFs per node)
+# ---------------------------------------------------------------------------
+
+def assemble_global_stiffness_tet4(
+    nodes: np.ndarray,
+    elements: np.ndarray,
+    D: np.ndarray,
+) -> sparse.csr_matrix:
+    """Assemble the global stiffness matrix from Tet4 elements.
+
+    Args:
+        nodes: (N, 3) array of node coordinates.
+        elements: (M, 4) array of element connectivity.
+        D: (6, 6) constitutive matrix.
+
+    Returns:
+        (3N, 3N) sparse CSR global stiffness matrix.
+    """
+    n_nodes = len(nodes)
+    n_dof = 3 * n_nodes
+    n_elem = len(elements)
+
+    # Each Tet4 contributes 12×12 = 144 entries.
+    rows = np.zeros(n_elem * 144, dtype=np.int64)
+    cols = np.zeros(n_elem * 144, dtype=np.int64)
+    vals = np.zeros(n_elem * 144, dtype=np.float64)
+
+    for e in range(n_elem):
+        el_nodes = elements[e]
+        coords_e = nodes[el_nodes]
+        ke = tet4_element_stiffness(coords_e, D)
+
+        dof_map = np.empty(12, dtype=np.int64)
+        for i in range(4):
+            dof_map[3 * i]     = 3 * el_nodes[i]
+            dof_map[3 * i + 1] = 3 * el_nodes[i] + 1
+            dof_map[3 * i + 2] = 3 * el_nodes[i] + 2
+
+        offset = e * 144
+        idx = 0
+        for i in range(12):
+            for j in range(12):
+                rows[offset + idx] = dof_map[i]
+                cols[offset + idx] = dof_map[j]
+                vals[offset + idx] = ke[i, j]
+                idx += 1
+
+    K = sparse.coo_matrix((vals, (rows, cols)), shape=(n_dof, n_dof))
+    return K.tocsr()
+
+
+def assemble_global_force_tet4(
+    nodes: np.ndarray,
+    elements: np.ndarray,
+    body_force: np.ndarray | None = None,
+) -> np.ndarray:
+    """Assemble the global force vector for Tet4 elements.
+
+    Args:
+        nodes: (N, 3) node coordinates.
+        elements: (M, 4) element connectivity.
+        body_force: (3,) body force vector [bx, by, bz]. None → zero.
+
+    Returns:
+        (3N,) global force vector.
+    """
+    n_dof = 3 * len(nodes)
+    f = np.zeros(n_dof)
+
+    if body_force is None:
+        return f
+
+    bx, by, bz = body_force
+    for e in range(len(elements)):
+        el_nodes = elements[e]
+        coords_e = nodes[el_nodes]
+        # Tet volume = |det(J)| / 6
+        d1 = coords_e[1] - coords_e[0]
+        d2 = coords_e[2] - coords_e[0]
+        d3 = coords_e[3] - coords_e[0]
+        det_J = abs(np.dot(d1, np.cross(d2, d3)))
+        vol = det_J / 6.0
+
+        force_per_node = vol / 4.0
+        for ni in el_nodes:
+            f[3 * ni]     += bx * force_per_node
+            f[3 * ni + 1] += by * force_per_node
+            f[3 * ni + 2] += bz * force_per_node
 
     return f
