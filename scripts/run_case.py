@@ -20,6 +20,10 @@ CASES = {
     "beam3d": "beam3d.py",
     "vibration": "vibration.py",
     "cantilever_nl": "cantilever_nl.py",
+    "stretch_beam": "stretch_beam.py",
+    "gravity_drop": "gravity_drop.py",
+    "cantilever_cr": "cantilever_cr.py",
+    "vibration_cr": "vibration_cr.py",
 }
 
 

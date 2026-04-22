@@ -28,7 +28,17 @@ from femlab.core.element_nl import tet4_internal_force_nl, tet4_tangent_stiffnes
 from femlab.core.assembly_nl import (
     assemble_internal_force_tet4_nl, assemble_system_tet4_nl,
 )
-from femlab.core.newton import solve_newton
+from femlab.core.corotational import (
+    polar_decomposition_tet4, tet4_internal_force_cr, tet4_tangent_stiffness_cr,
+)
+from femlab.core.assembly_cr import (
+    assemble_internal_force_tet4_cr, assemble_system_tet4_cr,
+)
+from femlab.core.newton import solve_newton, solve_newton_general
+from femlab.core.dynamics_nl import (
+    backward_euler_nl, newmark_beta_nl, quasi_static_nl,
+    compute_strain_energy_cr,
+)
 
 __all__ = [
     # T3 basis
@@ -62,4 +72,13 @@ __all__ = [
     "assemble_internal_force_tet4_nl", "assemble_system_tet4_nl",
     # Newton solver
     "solve_newton",
+    "solve_newton_general",
+    # Corotational
+    "polar_decomposition_tet4",
+    "tet4_internal_force_cr", "tet4_tangent_stiffness_cr",
+    # Corotational assembly
+    "assemble_internal_force_tet4_cr", "assemble_system_tet4_cr",
+    # Nonlinear dynamics
+    "backward_euler_nl", "newmark_beta_nl", "quasi_static_nl",
+    "compute_strain_energy_cr",
 ]

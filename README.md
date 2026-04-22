@@ -143,9 +143,44 @@ python scripts/run_case.py cantilever_nl
 - Only Neo-Hookean material; no Mooney-Rivlin or Ogden yet
 - Displacement-based formulation may lock for nearly incompressible materials (ν → 0.5)
 
-## Milestone 4 (Next): Corotational FEM
+## Milestone 4: Corotational FEM
 
-- [ ] Polar decomposition of F → rotation R per element
-- [ ] Corotational element stiffness and residual wrapper
-- [ ] Geometric stiffness correction term
-- [ ] Comparison against full nonlinear solve
+**Status**: Complete
+
+What is implemented:
+- Polar decomposition of F → rotation R per element via `scipy.linalg.polar` (`femlab.core.corotational`)
+- Block rotation matrix T_R = blkdiag(R,R,R,R) for transforming forces/displacements
+- Corotational internal force: remove rotation → linear force → rotate back
+- Corotational tangent stiffness: T_R · K_linear · T_R^T + geometric stiffness K_σ
+- Geometric (initial-stress) stiffness correction from local stress state
+- Corotational global assembly via COO→CSR (`femlab.core.assembly_cr`)
+- General-purpose Newton solver (`solve_newton_general`) for arbitrary assembly functions
+- Large-rotation tests: pure 90°/120° rotation gives zero force (linear FEM gives large spurious force)
+- Rotation + stretch tests: corotational extracts correct local deformation
+- Tangent consistency verified against finite differences
+- Comparison demo: Linear vs Corotational vs Full Nonlinear (Neo-Hookean) load-displacement curves
+
+### Run the demo
+
+```bash
+python scripts/run_case.py cantilever_cr
+```
+
+### Run tests
+
+```bash
+pytest
+```
+
+### Known limitations
+
+- Assembly loops are in Python (no Warp kernel acceleration yet)
+- Geometric stiffness uses the standard initial-stress formula (approximate for the corotational formulation)
+- Corotational assumes small strains — for large-strain problems use the full nonlinear solver
+- Only Tet4 elements supported for corotational formulation
+
+## Milestone 5 (Next): Research — XFEM / Cutting
+
+- [ ] Enrichment functions for discontinuities
+- [ ] Level-set representation of cuts
+- [ ] Modified assembly for enriched elements

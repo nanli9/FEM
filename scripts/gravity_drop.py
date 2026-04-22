@@ -37,7 +37,7 @@ def main():
     E = 200.0     # Young's modulus (soft rubber-like, same as stretch demo)
     nu = 0.3
     rho = 1.0     # mass density
-    g = 9.81      # gravitational acceleration
+    g = 20.81      # gravitational acceleration
 
     # Mesh divisions.
     # box_mesh builds along [0,Lx] x [0,Ly] x [0,Lz].
